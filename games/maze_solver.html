@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maze Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+       body {
+    font-family: 'Arial', sans-serif;
+    background-image: url('https://img.freepik.com/free-vector/gradient-video-game-background_23-2150295326.jpg'); /* Replace with your image URL */
+    background-size: cover; /* Ensure the background image covers the entire page */
+    background-position: center; /* Center the background image */
+    background-attachment: fixed; /* Keep the background fixed when scrolling */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    color: #333;
+}
+
+
+        .game-container {
+            text-align: center;
+            background-color: #ffffff;
+            padding: 40px 60px;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            width: 400px;
+            height: auto;
+            position: relative;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        .maze {
+            display: grid;
+            grid-template-columns: repeat(5, 60px);
+            grid-template-rows: repeat(5, 60px);
+            gap: 5px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .cell {
+            width: 60px;
+            height: 60px;
+            background-color: #f2f2f2;
+            border: 1px solid #ddd;
+            transition: background-color 0.3s ease;
+        }
+
+        .cell:hover {
+            background-color: #e0e0e0;
+        }
+
+        .wall {
+            background-color: #333;
+        }
+
+        .player {
+            background-color: #4CAF50;
+            transition: transform 0.3s ease;
+        }
+
+        .goal {
+            background-color: #ff6347;
+        }
+
+        #status {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: red;
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            text-align: center;
+        }
+
+        .restart-btn {
+            padding: 15px 30px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            border-radius: 10px;
+            margin-top: 15px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .restart-btn:hover {
+            background-color: #45a049;
+            transform: scale(1.1);
+        }
+
+        .restart-btn:active {
+            transform: scale(1);
+        }
+
+        @media (max-width: 600px) {
+            .game-container {
+                width: 80%;
+                padding: 20px 40px;
+            }
+
+            .maze {
+                grid-template-columns: repeat(5, 50px);
+                grid-template-rows: repeat(5, 50px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Maze Game</h1>
+        <div id="status">Move the player to the goal!</div>
+        <div class="maze" id="maze"></div>
+        <button id="restart" class="restart-btn">Restart Game</button>
+    </div>
+
+    <script>
+        const mazeContainer = document.getElementById('maze');
+        const status = document.getElementById('status');
+        const restartButton = document.getElementById('restart');
+
+        const rows = 5;
+        const cols = 5;
+        let playerPosition = { row: 0, col: 0 };
+        let goalPosition = { row: 4, col: 4 };
+        let currentLevel = 0;
+
+        const mazes = [
+            [
+                [0, 0, 1, 0, 0],
+                [0, 0, 1, 1, 0],
+                [0, 0, 0, 1, 0],
+                [1, 1, 0, 0, 0],
+                [0, 0, 0, 1, 0]
+            ],
+            [
+                [0, 1, 1, 0, 0],
+                [0, 1, 0, 1, 0],
+                [0, 0, 0, 1, 0],
+                [1, 1, 0, 0, 0],
+                [0, 0, 0, 0, 0]
+            ],
+            [
+                [0, 0, 1, 1, 0],
+                [1, 0, 0, 0, 0],
+                [0, 0, 1, 1, 1],
+                [1, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0]
+            ],
+            [
+                [0, 0, 0, 1, 0],
+                [1, 1, 0, 0, 0],
+                [0, 1, 0, 1, 0],
+                [0, 0, 0, 0, 1],
+                [0, 0, 0, 0, 0]
+            ],
+            [
+                [0, 1, 0, 0, 0],
+                [0, 1, 1, 1, 0],
+                [0, 0, 0, 1, 0],
+                [1, 0, 0, 0, 0],
+                [0, 0, 0, 1, 0]
+            ]
+        ];
+
+        // Function to create the maze
+        function createMaze() {
+            mazeContainer.innerHTML = '';
+            const maze = mazes[currentLevel];
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    if (maze[row][col] === 1) {
+                        cell.classList.add('wall');
+                    }
+                    if (row === playerPosition.row && col === playerPosition.col) {
+                        cell.classList.add('player');
+                    }
+                    if (row === goalPosition.row && col === goalPosition.col) {
+                        cell.classList.add('goal');
+                    }
+                    mazeContainer.appendChild(cell);
+                }
+            }
+        }
+
+        // Function to move the player
+        function movePlayer(direction) {
+            const maze = mazes[currentLevel];
+            if (direction === 'up' && playerPosition.row > 0 && maze[playerPosition.row - 1][playerPosition.col] !== 1) {
+                playerPosition.row--;
+            } else if (direction === 'down' && playerPosition.row < rows - 1 && maze[playerPosition.row + 1][playerPosition.col] !== 1) {
+                playerPosition.row++;
+            } else if (direction === 'left' && playerPosition.col > 0 && maze[playerPosition.row][playerPosition.col - 1] !== 1) {
+                playerPosition.col--;
+            } else if (direction === 'right' && playerPosition.col < cols - 1 && maze[playerPosition.row][playerPosition.col + 1] !== 1) {
+                playerPosition.col++;
+            }
+
+            // Check if player reaches the goal
+            if (playerPosition.row === goalPosition.row && playerPosition.col === goalPosition.col) {
+                if (currentLevel < mazes.length - 1) {
+                    status.textContent = `Level ${currentLevel + 1} Completed! Moving to Level ${currentLevel + 2}`;
+                    currentLevel++;
+                    playerPosition = { row: 0, col: 0 };
+                    goalPosition = { row: 4, col: 4 };
+                } else {
+                    status.textContent = 'You Won the Game!';
+                    status.style.color = 'green';
+                }
+            } else {
+                status.textContent = `Level ${currentLevel + 1}: Move the player to the goal!`;
+            }
+
+            createMaze();
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowUp') {
+                movePlayer('up');
+            } else if (e.key === 'ArrowDown') {
+                movePlayer('down');
+            } else if (e.key === 'ArrowLeft') {
+                movePlayer('left');
+            } else if (e.key === 'ArrowRight') {
+                movePlayer('right');
+            }
+        });
+
+        restartButton.addEventListener('click', () => {
+            currentLevel = 0;
+            playerPosition = { row: 0, col: 0 };
+            goalPosition = { row: 4, col: 4 };
+            status.textContent = 'Move the player to the goal!';
+            status.style.color = 'red';
+            createMaze();
+        });
+
+        createMaze(); // Initialize the maze
+    </script>
+</body>
+</html>

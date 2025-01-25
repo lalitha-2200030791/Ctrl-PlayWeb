@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Game Hub</title>
+    <style>
+        /* General Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body styling */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #ffebf0;  /* Soft pink background */
+            color: #333;
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+            text-align: center;
+            background-image: url('https://www.transparenttextures.com/patterns/polkadots.png');
+            background-size: cover;
+        }
+
+        /* Header Styling */
+        header {
+            background-color: #ff8cbf;
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 40px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        header h1 {
+            font-size: 2.8rem;
+            margin-top: 15px;
+            font-family: 'Pacifico', cursive; /* Playful font */
+        }
+
+        /* Logo Image Styling */
+        .logo {
+            width: 120px;
+            height: auto;
+            border-radius: 50%;
+            border: 5px solid #fff;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Game List Styling */
+        .game-list {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            padding: 20px;
+            width: 80%;
+            max-width: 850px;
+        }
+
+        .game-item {
+            background-color: #ff72a4;
+            color: white;
+            padding: 25px;
+            text-decoration: none;
+            font-size: 1.4rem;
+            font-weight: bold;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .game-item::before {
+            content: "🎮";
+            font-size: 1.5rem;
+            position: absolute;
+            left: 50%;
+            top: 10%;
+            transform: translateX(-50%);
+        }
+
+        .game-item:hover {
+            background-color: #ff4b77;
+            transform: translateY(-7px);
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
+        }
+
+        .game-item:active {
+            transform: translateY(2px);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .game-list {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .game-item {
+                font-size: 1.2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .game-list {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .game-item {
+                font-size: 1rem;
+            }
+        }
+
+        /* Floating Animation for Header */
+        @keyframes float {
+            0% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        /* Footer Styling */
+        footer {
+            margin-top: 40px;
+            font-size: 1rem;
+            color: #ff4b77;
+            padding: 15px;
+            background-color: #ffebf0;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="https://cdn.pixabay.com/photo/2016/03/31/15/32/button-1293379_640.png" alt="Game Hub Logo" class="logo">
+        <h1>Welcome to Ctrl+Play</h1>
+    </header>
+
+    <div class="game-list">
+        <a href="/games/tic_tac_toe" class="game-item">Tic Tac Toe</a>
+        <a href="/games/maze_solver" class="game-item">Maze Game</a>
+        <a href="/games/whack_a_mole" class="game-item">Whack-a-Mole</a>
+        <a href="/games/snake_game" class="game-item">Snake Game</a>
+        <a href="/games/brick_breaker" class="game-item">Brick Breaker</a>
+        <a href="/games/memory_game" class="game-item">Memory Game</a>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 Lalitha. All Rights Reserved.</p>
+    </footer>
+
+    <script src="/script.js"></script>
+</body>
+</html>

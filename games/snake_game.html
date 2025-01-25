@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #000;
+            color: #fff;
+        }
+
+        .game-container {
+            width: 400px;
+            height: 400px;
+            background-color: #222;
+            border: 2px solid #fff;
+            position: relative;
+        }
+
+        .snake {
+            background-color: #4caf50;
+            position: absolute;
+            width: 20px;
+            height: 20px;
+        }
+
+        .food {
+            background-color: #f44336;
+            position: absolute;
+            width: 20px;
+            height: 20px;
+        }
+
+        .bomb {
+            background-color: #ff5722;
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+
+        #score {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 20px;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+    <div><strong>Goal:</strong> Eat the red food to grow the snake and avoid the bomb!</div>
+
+    <!-- Game Container -->
+    <div class="game-container">
+        <div id="score">Score: 0</div>
+    </div>
+
+    <!-- Start Button -->
+    <button id="startBtn">Start Game</button>
+
+    <script>
+        const gameContainer = document.querySelector('.game-container');
+        const scoreDisplay = document.getElementById('score');
+        const startButton = document.getElementById('startBtn');
+
+        const gridSize = 20; // size of each grid cell
+        let snake = [{ x: 5 * gridSize, y: 5 * gridSize }];
+        let food = {};
+        let bomb = {};
+        let direction = { x: 1, y: 0 }; // initially moving right
+        let gameInterval;
+        let score = 0;
+
+        // Function to generate food at a random position
+        function generateFood() {
+            let x, y;
+            do {
+                x = Math.floor(Math.random() * (gameContainer.clientWidth / gridSize)) * gridSize;
+                y = Math.floor(Math.random() * (gameContainer.clientHeight / gridSize)) * gridSize;
+            } while (isPositionOccupied(x, y)); // Ensure food doesn't overlap snake or bomb
+
+            food = { x, y };
+        }
+
+        // Function to generate bomb at a random position
+        function generateBomb() {
+            let x, y;
+            do {
+                x = Math.floor(Math.random() * (gameContainer.clientWidth / gridSize)) * gridSize;
+                y = Math.floor(Math.random() * (gameContainer.clientHeight / gridSize)) * gridSize;
+            } while (isPositionOccupied(x, y)); // Ensure bomb doesn't overlap snake or food
+
+            bomb = { x, y };
+        }
+
+        // Helper function to check if the position is occupied by snake or bomb
+        function isPositionOccupied(x, y) {
+            // Check if position is occupied by the snake
+            for (let i = 0; i < snake.length; i++) {
+                if (snake[i].x === x && snake[i].y === y) return true;
+            }
+            // Check if position is occupied by the bomb
+            if (bomb.x === x && bomb.y === y) return true;
+
+            return false;
+        }
+
+        // Function to draw the snake on the screen
+        function drawSnake() {
+            gameContainer.innerHTML = ''; // Clear the game container first
+            snake.forEach(segment => {
+                const snakeElement = document.createElement('div');
+                snakeElement.classList.add('snake');
+                snakeElement.style.left = `${segment.x}px`;
+                snakeElement.style.top = `${segment.y}px`;
+                gameContainer.appendChild(snakeElement);
+            });
+            drawFood();
+            drawBomb();
+        }
+
+        // Function to draw the food on the screen
+        function drawFood() {
+            const foodElement = document.createElement('div');
+            foodElement.classList.add('food');
+            foodElement.style.left = `${food.x}px`;
+            foodElement.style.top = `${food.y}px`;
+            gameContainer.appendChild(foodElement);
+        }
+
+        // Function to draw the bomb on the screen
+        function drawBomb() {
+            const bombElement = document.createElement('div');
+            bombElement.classList.add('bomb');
+            bombElement.style.left = `${bomb.x}px`;
+            bombElement.style.top = `${bomb.y}px`;
+            gameContainer.appendChild(bombElement);
+        }
+
+        // Function to update the snake's position
+        function updateSnake() {
+            const head = { ...snake[0] };
+            head.x += direction.x * gridSize;
+            head.y += direction.y * gridSize;
+
+            // Wrap around the screen when snake hits boundaries
+            if (head.x < 0) head.x = gameContainer.clientWidth - gridSize;
+            if (head.x >= gameContainer.clientWidth) head.x = 0;
+            if (head.y < 0) head.y = gameContainer.clientHeight - gridSize;
+            if (head.y >= gameContainer.clientHeight) head.y = 0;
+
+            // Check for collision with itself
+            if (snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+                endGame();
+                return;
+            }
+
+            // Check for collision with bomb
+            if (head.x === bomb.x && head.y === bomb.y) {
+                endGame();
+                return;
+            }
+
+            snake.unshift(head);
+
+            // Check if snake eats food
+            if (head.x === food.x && head.y === food.y) {
+                score++;
+                scoreDisplay.textContent = `Score: ${score}`;
+                generateFood(); // Generate new food
+                generateBomb(); // Generate new bomb
+            } else {
+                snake.pop(); // Remove the last segment of the snake only if no food was eaten
+            }
+
+            drawSnake();
+        }
+
+        // Function to handle key press for direction
+        function changeDirection(event) {
+            switch (event.key) {
+                case 'ArrowUp':
+                    if (direction.y !== 1) {
+                        direction = { x: 0, y: -1 };
+                    }
+                    break;
+                case 'ArrowDown':
+                    if (direction.y !== -1) {
+                        direction = { x: 0, y: 1 };
+                    }
+                    break;
+                case 'ArrowLeft':
+                    if (direction.x !== 1) {
+                        direction = { x: -1, y: 0 };
+                    }
+                    break;
+                case 'ArrowRight':
+                    if (direction.x !== -1) {
+                        direction = { x: 1, y: 0 };
+                    }
+                    break;
+            }
+        }
+
+        // Function to end the game
+        function endGame() {
+            clearInterval(gameInterval);
+            alert(`Game Over! Your final score is: ${score}`);
+            startButton.disabled = false; // Enable the start button after game over
+        }
+
+        // Function to start the game
+        function startGame() {
+            score = 0;
+            snake = [{ x: 5 * gridSize, y: 5 * gridSize }];
+            direction = { x: 1, y: 0 };
+            scoreDisplay.textContent = `Score: ${score}`;
+            generateFood();
+            generateBomb();
+
+            startButton.disabled = true;
+
+            gameInterval = setInterval(() => {
+                updateSnake();
+            }, 100);
+
+            // Listen to keypresses for direction
+            document.addEventListener('keydown', changeDirection);
+        }
+
+        // Start button event
+        startButton.addEventListener('click', startGame);
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe Game</title>
+    <style>
+        /* Reset default styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f9f9f9;
+            background-image: url('https://t3.ftcdn.net/jpg/00/88/98/18/360_F_88981880_YjJManMJ6hJmKr5CZteFJAkEzXIh8mxW.jpg'); /* or .png */
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+
+        /* Container for the game with bigger size */
+        .game-container {
+            text-align: center;
+            background-color: white;
+            padding: 40px 50px; /* Adjusted padding */
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            width: 500px; /* Increased width */
+            height: 460px; /* Height remains the same */
+            position: relative; /* Make this relative for positioning the status inside */
+        }
+
+        h1 {
+            font-size: 2.8rem; /* Larger font size */
+            margin-bottom: 20px; /* Reduced margin */
+            font-weight: bold;
+            color: #1e90ff; /* Blue color */
+        }
+
+        /* Status message (on top of the game container) */
+        #status {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: red; /* Blue color for status */
+            position: absolute;
+            top: -40px; /* Position it above the game container */
+            left: 50%;
+            transform: translateX(-50%); /* Center the message */
+            width: 100%;
+            text-align: center;
+        }
+
+        /* The Tic-Tac-Toe board */
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 110px);
+            grid-template-rows: repeat(3, 110px);
+            gap: 15px;
+            margin-bottom: 20px; /* Reduced margin */
+            justify-content: center;
+        }
+
+        /* Individual cells of the board */
+        .cell {
+            width: 100px;
+            height: 100px;
+            background-color: #f2f2f2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            border: 3px solid #ddd;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        /* Hover effect for cells */
+        .cell:hover {
+            background-color: #e0e0e0;
+            transform: scale(1.1);
+        }
+
+        /* X and O mark styles */
+        .cell.X {
+            color: #ff6347;
+        }
+
+        .cell.O {
+            color: #1e90ff;
+        }
+
+        /* Restart button */
+        .restart-btn {
+            padding: 12px 25px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 15px;
+            transition: background-color 0.3s;
+        }
+
+        .restart-btn:hover {
+            background-color: #45a049;
+        }
+
+        /* Animation for winner text */
+        @keyframes winnerAnimation {
+            0% { color: #ff6347; }
+            50% { color: #1e90ff; }
+            100% { color: #ff6347; }
+        }
+
+        #status.winner {
+            animation: winnerAnimation 1s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Tic-Tac-Toe</h1>
+        <p id="status">Player X's Turn</p> <!-- Move status inside the game-container -->
+        <div class="board" id="board">
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+            <div class="cell" data-index="4"></div>
+            <div class="cell" data-index="5"></div>
+            <div class="cell" data-index="6"></div>
+            <div class="cell" data-index="7"></div>
+            <div class="cell" data-index="8"></div>
+        </div>
+        <button id="restart" class="restart-btn">Restart Game</button>
+    </div>
+
+    <script>
+        const board = document.getElementById('board');
+        const cells = document.querySelectorAll('.cell');
+        const status = document.getElementById('status');
+        const restartButton = document.getElementById('restart');
+
+        let currentPlayer = 'X';
+        let gameBoard = ['', '', '', '', '', '', '', '', ''];
+        let gameOver = false;
+
+        // Handle cell click
+        board.addEventListener('click', (e) => {
+            if (gameOver) return;
+
+            const index = e.target.getAttribute('data-index');
+
+            if (!gameBoard[index]) {
+                gameBoard[index] = currentPlayer;
+                e.target.textContent = currentPlayer;
+                e.target.classList.add(currentPlayer);
+
+                // Check for a win
+                if (checkWinner()) {
+                    status.textContent = `${currentPlayer} Wins!`;
+                    status.classList.add('winner');
+                    gameOver = true;
+                } else if (gameBoard.every(cell => cell !== '')) {
+                    status.textContent = 'It\'s a Tie!';
+                    gameOver = true;
+                } else {
+                    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                    status.textContent = `Player ${currentPlayer}'s Turn`;
+                }
+            }
+        });
+
+        // Check if there is a winner
+        function checkWinner() {
+            const winningCombinations = [
+                [0, 1, 2],
+                [3, 4, 5],
+                [6, 7, 8],
+                [0, 3, 6],
+                [1, 4, 7],
+                [2, 5, 8],
+                [0, 4, 8],
+                [2, 4, 6]
+            ];
+
+            for (let combination of winningCombinations) {
+                const [a, b, c] = combination;
+                if (gameBoard[a] && gameBoard[a] === gameBoard[b] && gameBoard[a] === gameBoard[c]) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // Restart game
+        restartButton.addEventListener('click', () => {
+            gameBoard = ['', '', '', '', '', '', '', '', ''];
+            gameOver = false;
+            currentPlayer = 'X';
+            status.textContent = `Player ${currentPlayer}'s Turn`;
+            status.classList.remove('winner');
+            cells.forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('X', 'O');
+            });
+        });
+    </script>
+</body>
+</html>

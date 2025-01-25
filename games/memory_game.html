@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Card Game</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: #222;
+            font-family: Arial, sans-serif;
+        }
+        #gameContainer {
+            position: relative;
+            width: 600px;
+            height: 600px;
+            background: #111;
+            border: 4px solid #fff;
+            border-radius: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+        .card {
+            width: 130px;
+            height: 130px;
+            background: #0cf;
+            color: #fff;
+            font-size: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            user-select: none;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+        }
+        .flipped {
+            background: #ff0;
+            color: #111;
+        }
+        #startButton {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 15px 30px;
+            font-size: 24px;
+            font-weight: bold;
+            background: #0cf;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <button id="startButton">Start Game</button>
+    </div>
+
+    <script>
+        const gameContainer = document.getElementById('gameContainer');
+        const startButton = document.getElementById('startButton');
+
+        const symbols = ['🍎', '🍌', '🍇', '🍉', '🍓', '🍍', '🥝', '🍒'];
+        let cards = [];
+        let flippedCards = [];
+        let matchedPairs = 0;
+        let isGameRunning = false;
+
+        // Function to shuffle an array
+        function shuffle(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        // Function to create the card elements
+        function createCards() {
+            let shuffledSymbols = shuffle([...symbols, ...symbols]);
+            shuffledSymbols.forEach(symbol => {
+                let card = document.createElement('div');
+                card.classList.add('card');
+                card.dataset.symbol = symbol;
+                card.innerHTML = '?';
+                card.addEventListener('click', flipCard);
+                gameContainer.appendChild(card);
+                cards.push(card);
+            });
+        }
+
+        // Start game event listener
+        startButton.addEventListener('click', () => {
+            startButton.style.display = 'none';
+            gameContainer.innerHTML = '';
+            cards = [];
+            matchedPairs = 0;
+            createCards();
+            isGameRunning = true;
+        });
+
+        // Card flip function
+        function flipCard() {
+            if (!isGameRunning || flippedCards.length >= 2) return;
+
+            this.classList.add('flipped');
+            this.innerHTML = this.dataset.symbol;
+            flippedCards.push(this);
+
+            if (flippedCards.length === 2) {
+                setTimeout(checkMatch, 700);
+            }
+        }
+
+        // Check for a match
+        function checkMatch() {
+            const [card1, card2] = flippedCards;
+
+            if (card1.dataset.symbol === card2.dataset.symbol) {
+                card1.style.pointerEvents = 'none';
+                card2.style.pointerEvents = 'none';
+                matchedPairs++;
+
+                if (matchedPairs === symbols.length) {
+                    alert("Congratulations! You matched all pairs!");
+                    resetGame();
+                }
+            } else {
+                card1.classList.remove('flipped');
+                card2.classList.remove('flipped');
+                card1.innerHTML = '?';
+                card2.innerHTML = '?';
+            }
+
+            flippedCards = [];
+        }
+
+        // Reset game function
+        function resetGame() {
+            isGameRunning = false;
+            startButton.style.display = 'block';
+            gameContainer.innerHTML = '';
+        }
+    </script>
+</body>
+</html>

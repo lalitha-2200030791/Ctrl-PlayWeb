@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whack-a-Mole Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: url('https://t3.ftcdn.net/jpg/00/88/98/18/360_F_88981880_YjJManMJ6hJmKr5CZteFJAkEzXIh8mxW.jpg') no-repeat center center/cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #fff;
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .game-container {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            width: 500px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            color: #ffcc00;
+            margin-bottom: 20px;
+        }
+
+        .info {
+            font-size: 1.5rem;
+            margin: 10px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .hole {
+            width: 130px;
+            height: 130px;
+            background: #444;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mole {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 80px;
+            background: #6d4c41; /* Brown color for the mole */
+            border-radius: 50%;
+            display: none;
+            z-index: 10;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1.5rem;
+            background: #ff5722;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #e64a19;
+        }
+
+        .reset-btn {
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Whack-a-Mole</h1>
+        <div class="info" id="score">Score: 0</div>
+        <div class="info" id="timer">Time: 30s</div>
+        <div class="grid" id="grid">
+            <div class="hole" id="hole-0"><div class="mole" id="mole-0"></div></div>
+            <div class="hole" id="hole-1"><div class="mole" id="mole-1"></div></div>
+            <div class="hole" id="hole-2"><div class="mole" id="mole-2"></div></div>
+            <div class="hole" id="hole-3"><div class="mole" id="mole-3"></div></div>
+            <div class="hole" id="hole-4"><div class="mole" id="mole-4"></div></div>
+            <div class="hole" id="hole-5"><div class="mole" id="mole-5"></div></div>
+            <div class="hole" id="hole-6"><div class="mole" id="mole-6"></div></div>
+            <div class="hole" id="hole-7"><div class="mole" id="mole-7"></div></div>
+            <div class="hole" id="hole-8"><div class="mole" id="mole-8"></div></div>
+        </div>
+        <button id="startBtn">Start Game</button>
+        <button id="resetBtn" class="reset-btn">Play Again</button>
+    </div>
+
+    <script>
+        const moles = document.querySelectorAll('.mole');
+        const holes = document.querySelectorAll('.hole');
+        const scoreDisplay = document.getElementById('score');
+        const timerDisplay = document.getElementById('timer');
+        const startButton = document.getElementById('startBtn');
+        const resetButton = document.getElementById('resetBtn');
+
+        let score = 0;
+        let timeLeft = 30;
+        let gameInterval;
+        let moleTimeout;
+        let gameStarted = false;
+        let moleInterval;
+
+        // Function to start the game
+        function startGame() {
+            score = 0;
+            timeLeft = 30;
+            gameStarted = true;
+            scoreDisplay.textContent = `Score: ${score}`;
+            timerDisplay.textContent = `Time: ${timeLeft}s`;
+            startButton.disabled = true;
+            resetButton.style.display = 'none';
+
+            // Hide all moles initially
+            moles.forEach(mole => mole.style.display = 'none');
+
+            // Start the countdown timer
+            gameInterval = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(gameInterval);
+                    clearInterval(moleInterval);
+                    alert('Game Over! Final Score: ' + score);
+                    startButton.disabled = false;
+                    resetButton.style.display = 'inline-block';  // Show Play Again button
+                    gameStarted = false;
+                } else {
+                    timeLeft--;
+                    timerDisplay.textContent = `Time: ${timeLeft}s`;
+                }
+            }, 1000);
+
+            // Start showing random moles every 1 second
+            moleInterval = setInterval(showRandomMole, 1000);
+        }
+
+        // Function to show a random mole
+        function showRandomMole() {
+            if (!gameStarted) return;
+
+            // Hide all moles first
+            moles.forEach(mole => mole.style.display = 'none');
+
+            // Select a random hole
+            const randomIndex = Math.floor(Math.random() * moles.length);
+            const mole = moles[randomIndex];
+            mole.style.display = 'block';
+
+            // Hide the mole after 1 second
+            setTimeout(() => mole.style.display = 'none', 1000);
+        }
+
+        // Function to handle mole click
+        moles.forEach(mole => {
+            mole.addEventListener('click', () => {
+                if (mole.style.display === 'block') {
+                    score++;
+                    scoreDisplay.textContent = `Score: ${score}`;
+                    mole.style.display = 'none';
+                }
+            });
+        });
+
+        // Start button event
+        startButton.addEventListener('click', startGame);
+
+        // Reset button event
+        resetButton.addEventListener('click', () => {
+            score = 0;
+            timeLeft = 30;
+            scoreDisplay.textContent = `Score: ${score}`;
+            timerDisplay.textContent = `Time: ${timeLeft}s`;
+            resetButton.style.display = 'none';
+            startButton.disabled = false;
+            startGame();
+        });
+    </script>
+</body>
+</html>
